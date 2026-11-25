@@ -1,0 +1,77 @@
+/* NFS Underground 2 HUD theme. Layout is in 1920x1080 pixels; change the variables to retune. */
+:root {
+  --font: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --ink: #f2f2f2;
+  --dim: #b9b9b9;
+  --panel: rgba(22, 22, 25, 0.78);
+  --lime: #b8ea6a;
+  --cyan: #29c5d9;
+  --orange: #f0a232;
+  --red: #c8322c;
+  --edge: 70px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1920px; height: 1080px; overflow: hidden; background: transparent !important; }
+body { position: relative; font-family: var(--font); font-style: italic; color: var(--ink); }
+section { position: absolute; }
+
+/* --- top-left: Trax box --- */
+#trax {
+  left: var(--edge); top: 56px; min-width: 300px; padding: 10px 18px 12px;
+  background: rgba(0, 0, 0, 0.7); border: 2px solid var(--lime); border-radius: 5px;
+}
+#trax .caption { font-size: 15px; font-weight: 700; letter-spacing: 0.5px; color: var(--ink); }
+#trax .title { font-size: 40px; line-height: 1.05; }
+#trax .sub { font-size: 24px; line-height: 1.15; }
+#trax .sub span { font-weight: 700; }
+
+/* --- top-right: Bank box + top speed --- */
+#bank {
+  right: var(--edge); top: 56px; width: 330px; height: 64px; padding: 0 22px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--panel); border-radius: 18px 18px 18px 6px;
+}
+#bank .label { font-size: 27px; letter-spacing: 3px; color: var(--dim); }
+#bank .value { font-size: 34px; font-weight: 700; }
+#bank small { font-size: 20px; margin-left: 6px; color: var(--dim); font-weight: 400; }
+#topspeed { right: var(--edge); top: 440px; text-align: right; text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8); }
+#topspeed .label { font-size: 34px; font-weight: 700; letter-spacing: 1px; color: var(--lime); }
+#topspeed .value { font-size: 64px; font-weight: 700; line-height: 1; color: var(--lime); }
+
+/* --- bottom-left: radar --- */
+#radar { left: var(--edge); bottom: 64px; width: 280px; height: 280px; }
+#radar canvas {
+  position: absolute; left: 22px; top: 22px; width: 236px; height: 236px; border-radius: 50%;
+  background: #2a323d;
+}
+#radar .ring {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: 20px solid rgba(214, 214, 214, 0.6);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25), 0 0 0 2px rgba(0, 0, 0, 0.35);
+}
+#player { position: absolute; left: 50%; top: 50%; width: 30px; height: 36px; margin: -18px 0 0 -15px; }
+#player polygon { fill: #38d24b; stroke: #0d3b14; stroke-width: 2; stroke-linejoin: round; }
+
+/* --- bottom-right: gauges --- */
+#speedo { right: var(--edge); bottom: 56px; width: 460px; height: 460px; }
+#gauge { position: absolute; inset: 0; width: 460px; height: 460px; }
+#aux { position: absolute; left: -70px; bottom: -6px; width: 190px; height: 190px; }
+#digital { position: absolute; left: 252px; top: 242px; width: 150px; text-align: right; }
+#gear { font-size: 36px; font-weight: 700; color: var(--orange); line-height: 1; }
+#speed { font-size: 72px; font-weight: 700; line-height: 1; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7); }
+#unit { font-size: 28px; color: var(--dim); letter-spacing: 1px; }
+
+/* SVG parts */
+.face { fill: rgba(18, 18, 21, 0.74); stroke: rgba(255, 255, 255, 0.2); stroke-width: 3; }
+.n2o { fill: none; stroke: var(--cyan); stroke-width: 15; stroke-linecap: butt; }
+.n2o-text { fill: #0a3840; font: italic 700 22px var(--font); }
+.tick { stroke: #e9e9e9; stroke-width: 3; }
+.tick.minor { stroke: rgba(233, 233, 233, 0.6); stroke-width: 2; }
+.num { fill: #ececec; font: italic 400 30px var(--font); text-anchor: middle; dominant-baseline: central; }
+.redzone { fill: none; stroke: var(--red); stroke-width: 8; }
+.hub { fill: rgba(32, 32, 36, 0.95); stroke: rgba(255, 255, 255, 0.22); stroke-width: 3; }
+.needle { stroke: #e8e8e8; stroke-width: 5; stroke-linecap: round; }
+.cap { fill: #cfcfcf; }
+.aux-num { fill: #ececec; font: italic 400 17px var(--font); text-anchor: middle; dominant-baseline: central; }
+.aux-needle { stroke: #f0f0f0; stroke-width: 3; stroke-linecap: round; }

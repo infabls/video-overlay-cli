@@ -1,0 +1,8 @@
+{
+  "name": "overlay-themes",
+  "private": true,
+  "description": "Frame capture for HTML/CSS/JS overlay themes",
+  "devDependencies": {
+    "puppeteer-core": "*"
+  }
+}

@@ -7,7 +7,7 @@ The two halves are rendered separately and merged in a single ffmpeg encode:
 | Part | Made by | Source |
 | --- | --- | --- |
 | Radar with heading-up map, north marker, player arrow | Go renderer, layout `layouts/gta-sa.xml` (`moving_map style="gta-sa" marker="gta-sa"`, `compass labels="N" label_radius="0.97"` with `outline`/`outline_width`: the N rides the radar ring) | GPX/FIT |
-| Status cluster | React app in `hud-react/` (fork of [MickMelon/gta-sa-hud-react](https://github.com/MickMelon/gta-sa-hud-react), MIT), captured frame by frame in headless Chrome by `hud-react/capture.cjs` | GPX |
+| Status cluster | React app in `hud-react/` (fork of [MickMelon/gta-sa-hud-react](https://github.com/MickMelon/gta-sa-hud-react), MIT), captured frame by frame in headless Chrome by `themes/capture.cjs` | GPX |
 
 ## One command (Windows)
 

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>NFS Underground 2 overlay theme</title>
+  <meta name="viewport" content="width=1920, height=1080">
+  <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+  <!-- top-left: "Trax" box (clock and elapsed time) -->
+  <section id="trax">
+    <div class="caption">RIDE LOG</div>
+    <div class="title" id="trax-clock">--:--</div>
+    <div class="sub">Elapsed <span id="trax-elapsed">00:00</span></div>
+  </section>
+
+  <!-- top-right: "Bank" box (distance) and the top-speed call-out -->
+  <section id="bank"><span class="label">Dist:</span><span class="value"><span id="bank-value">0.00</span><small>km</small></span></section>
+  <section id="topspeed"><div class="label">TOP SPEED</div><div class="value" id="topspeed-value">+0</div></section>
+
+  <!-- bottom-left: radar -->
+  <section id="radar">
+    <canvas id="map" width="236" height="236"></canvas>
+    <div class="ring"></div>
+    <svg id="player" viewBox="-12 -14 24 28"><polygon points="0,-11 8,9 0,5 -8,9" /></svg>
+  </section>
+
+  <!-- bottom-right: gauges -->
+  <section id="speedo">
+    <svg id="gauge" viewBox="-200 -200 400 400"></svg>
+    <svg id="aux" viewBox="-80 -80 160 160"></svg>
+    <div id="digital"><div id="gear">1</div><div id="speed">0</div><div id="unit">MPH</div></div>
+  </section>
+
+  <script src="theme.js"></script>
+</body>
+</html>
