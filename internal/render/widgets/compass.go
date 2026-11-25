@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"math"
+	"strings"
 
 	"github.com/tdewolff/canvas"
 	"video-overlay-cli/internal/layout"
@@ -30,6 +31,12 @@ func compassFactory(element *layout.Element, _ *render.Context) (render.Drawer, 
 	text, err := colorAttr(element, "text", color.RGBA{R: 255, G: 255, B: 255, A: 255})
 	if err != nil {
 		return nil, err
+	}
+	labels := strings.ToUpper(attr(element, "labels", "NESW"))
+	for _, label := range labels {
+		if !strings.ContainsRune("NESW", label) {
+			return nil, fmt.Errorf("compass labels must contain only N, E, S, and W")
+		}
 	}
 	return func(ctx *render.Context) error {
 		radius := size / 2
@@ -111,6 +118,9 @@ func compassFactory(element *layout.Element, _ *render.Context) (render.Drawer, 
 			point(radius-minorTick, -5),
 			point(radius-minorTick, 5), fg)
 		for angle, label := range map[int]string{0: "N", 90: "E", 180: "S", 270: "W"} {
+			if !strings.Contains(labels, label) {
+				continue
+			}
 			x, y := roundPoint(cx, cy, radius/2, float64(angle)-heading)
 			drawText(ctx, x, y+textSize/3, textSize, label, "center", text, color.RGBA{}, 0)
 		}

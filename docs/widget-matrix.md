@@ -25,7 +25,7 @@ The catalog below is based on the original Python implementations in `gopro_over
 | `cairo_gauge_round_annotated` | `create_cairo_gauge_round_annotated` | Supported | Vector dial, labels, and needle. |
 | `chart` | `create_chart` | Supported | Supports time- and distance-based windows. |
 | `circuit_map` | `create_circuit_map` | Supported | Draws the recorded route without map tiles. |
-| `compass` | `create_compass` | Supported | Heading gauge. |
+| `compass` | `create_compass` | Supported | Heading gauge; `labels` can restrict the visible cardinal labels (for example, `labels="N"`). |
 | `compass_arrow` | `create_compass_arrow` | Supported | Heading arrow. |
 | `datetime` | `create_datetime` | Supported | Activity timestamp. |
 | `gps_lock_icon` | `create_gps_lock_icon` | Supported | GPS fix indicator and icon assets. |
@@ -34,7 +34,7 @@ The catalog below is based on the original Python implementations in `gopro_over
 | `metric` | `create_metric` | Supported | Formatted activity metric. |
 | `metric_unit` | `create_metric_unit` | Supported | Unit for a metric. |
 | `moving_journey_map` | `create_moving_journey_map` | Supported | Shows the route in a moving viewport. Uses the configured tile provider. |
-| `moving_map` | `create_moving_map` | Supported | Heading-oriented moving map with route marker. Uses the configured tile provider. |
+| `moving_map` | `create_moving_map` | Supported | Heading-oriented moving map with route marker. Uses the configured tile provider; `style="gta-sa"` recolors tiles to a game radar palette (no labels or footpaths); `marker="gta-sa"` draws the white player arrow. |
 | `msi` | `create_msi` | Supported | Motor speed indicator. |
 | `msi2` | `create_msi2` | Supported | Second motor speed indicator variant. |
 | `text` | `create_text` | Supported | Text from element content; supports left-to-right and top-to-bottom directions. |

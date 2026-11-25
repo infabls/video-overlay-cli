@@ -3,3 +3,7 @@
 /dist/
 /video-overlay-cli
 /tmp/
+
+# HUD React app
+/hud-react/node_modules/
+/hud-react/build/

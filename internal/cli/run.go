@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"image/png"
 	"io"
 	"math"
 	"os"
@@ -63,6 +64,7 @@ func runRender(ctx context.Context, args []string, stdout, stderr io.Writer) err
 	videoPath := flags.String("video", "", "optional source video for composition")
 	videoOffset := flags.Float64("video-offset", 0, "overlay start offset in source-video seconds")
 	defaults := maps.DefaultConfig()
+	snapshot := flags.Float64("snapshot", -1, "render a single PNG frame at this activity offset in seconds (--output must end in .png)")
 	privacyText := flags.String("privacy", "", "hide map details inside LAT,LON,KM radius")
 	tileURL := flags.String("tile-url", defaults.TileURL, "tile URL with {z}, {x}, {y} placeholders")
 	tileCachePath := flags.String("tile-cache", "", "persistent map tile cache (default OS cache dir)")
@@ -216,6 +218,28 @@ func runRender(ctx context.Context, args []string, stdout, stderr io.Writer) err
 	}
 	markStage("render.prepare")
 	if err := encodeCtx.Err(); err != nil {
+		return err
+	}
+	if *snapshot >= 0 {
+		if !strings.EqualFold(filepath.Ext(*outputPath), ".png") {
+			return errors.New("--snapshot requires a .png --output")
+		}
+		frame, err := renderers[0].FrameAt(time.Duration(*snapshot * float64(time.Second)))
+		if err != nil {
+			return err
+		}
+		file, err := os.Create(*outputPath)
+		if err != nil {
+			return err
+		}
+		encodeErr := png.Encode(file, frame)
+		if closeErr := file.Close(); encodeErr == nil {
+			encodeErr = closeErr
+		}
+		if encodeErr != nil {
+			return encodeErr
+		}
+		_, err = fmt.Fprintf(stdout, "Wrote %s (snapshot at %.1fs)\n", *outputPath, *snapshot)
 		return err
 	}
 	ffmpegCtx, stopFFmpeg := context.WithCancel(context.WithoutCancel(encodeCtx))

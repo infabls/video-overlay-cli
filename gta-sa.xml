@@ -1,0 +1,8 @@
+<layout>
+    <frame x="43" y="704" width="342" height="342" cr="171" bg="5,5,5,255" opacity="1">
+        <component type="moving_map" x="7" y="7" size="328" zoom="16" corner_radius="164" opacity="1" rotate="true" show-attribution="false" style="gta-sa" marker="gta-sa" />
+    </frame>
+    <!-- Compass letters rotate against the heading-up map; north remains accurate. -->
+    <component type="compass" x="185" y="709" size="58" textsize="18" fg="0,0,0,0" bg="0,0,0,0" text="0,0,0,255" labels="N" />
+    <component type="compass" x="184" y="708" size="58" textsize="18" fg="0,0,0,0" bg="0,0,0,0" text="242,242,242,255" labels="N" />
+</layout>

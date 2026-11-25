@@ -17,6 +17,7 @@ The renderer is written in Go; performance benchmarks were run on macOS with App
 - [XML layouts](#xml-layouts)
 - [Metrics and trail smoothing](#metrics-and-trail-smoothing)
 - [Maps, tiles, and privacy](#maps-tiles-and-privacy)
+- [GTA San Andreas overlay](docs/gta-sa.md)
 - [Documentation and examples](#documentation-and-examples)
 - [Development](#development)
 
@@ -158,6 +159,7 @@ The required inputs are an activity file, an XML layout, and an output path.
 | `--ffmpeg PATH` | `ffmpeg` | FFmpeg executable. |
 | `--video PATH` | — | Optional source video to composite under the overlay. |
 | `--video-offset SEC` | `0` | Timeline offset; requires `--video`. |
+| `--snapshot SEC` | — | Render one PNG frame at this activity offset (`--output` must end in `.png`). |
 | `--privacy LAT,LON,KM` | — | Hide map details within a radius around a location. |
 | `--tile-url TEMPLATE` | OpenStreetMap | Tile URL containing `{z}`, `{x}`, and `{y}` placeholders. |
 | `--tile-cache PATH` | OS user cache | Persistent cache directory for map tiles. |

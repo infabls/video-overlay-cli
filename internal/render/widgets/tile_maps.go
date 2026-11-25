@@ -29,6 +29,14 @@ func movingMapFactory(element *layout.Element, _ *render.Context) (render.Drawer
 	if err != nil || zoom < 1 || zoom > 19 {
 		return nil, fmt.Errorf("moving_map zoom must be between 1 and 19")
 	}
+	style := strings.ToLower(strings.TrimSpace(attr(element, "style", "default")))
+	if style != "default" && style != "gta-sa" {
+		return nil, fmt.Errorf("moving_map style must be default or gta-sa")
+	}
+	marker := strings.ToLower(strings.TrimSpace(attr(element, "marker", "default")))
+	if marker != "default" && marker != "gta-sa" {
+		return nil, fmt.Errorf("moving_map marker must be default or gta-sa")
+	}
 	rotate, err := boolAttr(element, "rotate", true)
 	if err != nil {
 		return nil, err
@@ -83,15 +91,30 @@ func movingMapFactory(element *layout.Element, _ *render.Context) (render.Drawer
 		if err := maps.RenderInto(ctx.MapContext, maps.Request{Viewport: viewport, Config: ctx.MapConfig}, base); err != nil {
 			return err
 		}
-		mapContext, raster := localCanvas(ctx, base)
-		drawMapMarker(&mapContext, float64(frameSize)/2, float64(frameSize)/2, 6, color.RGBA{B: 255, A: 255}, color.RGBA{A: 255})
-		raster.Close()
+		if style == "gta-sa" {
+			applyGTASAMapStyle(base)
+		}
+		if marker == "default" {
+			mapContext, raster := localCanvas(ctx, base)
+			drawMapMarker(&mapContext, float64(frameSize)/2, float64(frameSize)/2, 6, color.RGBA{B: 255, A: 255}, color.RGBA{A: 255})
+			raster.Close()
+		}
 		var frame *image.RGBA
 		if rotate && headingValid && math.Mod(heading, 360) != 0 {
 			frame = image.NewRGBA(image.Rect(0, 0, size, size))
 			rotateCropInto(frame, base, heading, size)
 		} else {
 			frame = cropCenter(base, size)
+		}
+		if marker == "gta-sa" {
+			// The arrow is drawn after rotation so it always points up on a heading-up map.
+			arrowHeading := 0.0
+			if !rotate && headingValid {
+				arrowHeading = heading
+			}
+			local, raster := localCanvas(ctx, frame)
+			drawGTASAArrow(&local, float64(size)/2, float64(size)/2, float64(size)/22, arrowHeading)
+			raster.Close()
 		}
 		if showAttribution {
 			drawMapAttribution(ctx, frame, ctx.MapConfig.Attribution)
@@ -104,6 +127,42 @@ func movingMapFactory(element *layout.Element, _ *render.Context) (render.Drawer
 		drawMapImage(ctx, frame)
 		return nil
 	}, nil
+}
+
+func applyGTASAMapStyle(img *image.RGBA) {
+	for y := img.Rect.Min.Y; y < img.Rect.Max.Y; y++ {
+		for x := img.Rect.Min.X; x < img.Rect.Max.X; x++ {
+			index := img.PixOffset(x, y)
+			if img.Pix[index+3] == 0 {
+				continue
+			}
+			r, g, b := int(img.Pix[index]), int(img.Pix[index+1]), int(img.Pix[index+2])
+			chroma := max(r, g, b) - min(r, g, b)
+			luma := (299*r + 587*g + 114*b) / 1000
+			var out [3]uint8
+			switch {
+			case b > g+8 && g > r+14:
+				out = [3]uint8{107, 150, 160} // water
+			case g > r+8 && g > b+8 && g > 95:
+				out = [3]uint8{95, 126, 72} // parks
+			case r > g+8 && g > b+25 && luma > 190:
+				out = [3]uint8{236, 232, 214} // yellow major roads
+			case r > g+18:
+				out = [3]uint8{176, 169, 142} // dotted footpaths: drop into the ground
+			case luma < 150:
+				out = [3]uint8{176, 169, 142} // labels and strong outlines: drop into the ground
+			case luma >= 250 && chroma < 8:
+				out = [3]uint8{236, 232, 214} // road surface
+			case luma >= 228:
+				out = [3]uint8{176, 169, 142} // open ground
+			case chroma >= 12:
+				out = [3]uint8{146, 139, 114} // buildings
+			default:
+				out = [3]uint8{128, 122, 100} // road edges
+			}
+			img.Pix[index], img.Pix[index+1], img.Pix[index+2] = out[0], out[1], out[2]
+		}
+	}
 }
 
 func journeyMapFactory(element *layout.Element, setup *render.Context) (render.Drawer, error) {
@@ -341,6 +400,31 @@ func drawMapMarker(ctx *render.Context, x, y, radius float64, fill, outline colo
 	ctx.Canvas.SetStrokeColor(nrgba(outline))
 	ctx.Canvas.SetStrokeWidth(1)
 	ctx.Canvas.DrawPath(x, y, circlePath(radius))
+	ctx.Canvas.Pop()
+}
+
+// drawGTASAArrow draws the white player arrow with a black outline used on the San Andreas radar.
+// unit is the arrow half-width; heading is clockwise degrees from "up".
+func drawGTASAArrow(ctx *render.Context, cx, cy, unit, heading float64) {
+	sin, cos := math.Sincos(heading * math.Pi / 180)
+	points := [][2]float64{{0, -1.5}, {1, 1.3}, {0, 0.6}, {-1, 1.3}}
+	path := &canvas.Path{}
+	for i, p := range points {
+		x, y := p[0]*unit, p[1]*unit
+		rx, ry := cx+x*cos-y*sin, cy+x*sin+y*cos
+		if i == 0 {
+			path.MoveTo(rx, ry)
+		} else {
+			path.LineTo(rx, ry)
+		}
+	}
+	path.Close()
+	ctx.Canvas.Push()
+	ctx.Canvas.SetFillColor(color.NRGBA{R: 255, G: 255, B: 255, A: 255})
+	ctx.Canvas.SetStrokeColor(color.NRGBA{A: 255})
+	ctx.Canvas.SetStrokeWidth(math.Max(1.5, unit/3))
+	ctx.Canvas.SetStrokeJoiner(canvas.RoundJoiner{})
+	ctx.Canvas.DrawPath(0, 0, path)
 	ctx.Canvas.Pop()
 }
 
