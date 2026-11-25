@@ -13,6 +13,8 @@ param(
   [double]$TzHours = 0,
   [int]$Stars = 6,
   [double]$Limit = 0,
+  [ValidateSet("raster", "vector")][string]$Map = "raster",
+  [ValidateSet("auto", "nvenc", "x264")][string]$Encoder = "auto",
   [string]$Layout = "",
   [string]$Cli = ""
 )

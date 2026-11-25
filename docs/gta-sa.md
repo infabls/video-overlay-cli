@@ -17,7 +17,7 @@ The two halves are rendered separately and merged in a single ffmpeg encode:
 
 Requirements: `ffmpeg`/`ffprobe`, Node, `pnpm`, Chrome, and a built `bin/video-overlay-cli.exe` (`go build -o bin/video-overlay-cli.exe ./cmd/video-overlay-cli`; `-Cli` overrides). The first run installs and builds `hud-react`.
 
-Useful parameters: `-Offset` (seconds into the video where the track starts), `-TzHours` (clock = GPX time + offset), `-Limit` (render only the first N seconds of video, for quick checks), `-Layout`, `-Stars` (lit wanted-level stars, 0-6, default 6).
+Useful parameters: `-Offset` (seconds into the video where the track starts), `-TzHours` (clock = GPX time + offset), `-Limit` (render only the first N seconds of video, for quick checks), `-Layout`, `-Stars` (lit wanted-level stars, 0-6, default 6), `-Map vector` (radar from vector tiles, `themes/gta-sa-radar`, instead of the Go renderer; the CLI binary is then not needed, see [themes.md](themes.md#vector-minimap)).
 
 The speed and distance on the HUD are computed from consecutive GPX points, so a track with invented timestamps shows invented speeds. Use a recorded track for real values.
 

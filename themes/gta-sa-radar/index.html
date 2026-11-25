@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>GTA San Andreas radar (vector map)</title>
+  <style>
+    html, body { margin: 0; padding: 0; width: 1920px; height: 1080px; overflow: hidden; background: transparent; }
+    /* same geometry as layouts/gta-sa.xml: 342px black disc at (43, 704), 316px map inside it */
+    #disc { position: absolute; left: 43px; top: 704px; width: 342px; height: 342px; border-radius: 50%; background: rgb(5, 5, 5); }
+    #map { position: absolute; left: 56px; top: 717px; width: 316px; height: 316px; border-radius: 50%; }
+    #marks { position: absolute; left: 0; top: 0; }
+    #north { font: bold 40px Arial, "Liberation Sans", sans-serif; text-anchor: middle; fill: rgb(242, 242, 242); stroke: #000; stroke-width: 10; stroke-linejoin: round; paint-order: stroke fill; }
+  </style>
+</head>
+<body>
+  <div id="disc"></div>
+  <canvas id="map" width="316" height="316"></canvas>
+  <svg id="marks" width="1920" height="1080" viewBox="0 0 1920 1080">
+    <!-- player arrow: always points up, the map turns under it -->
+    <polygon points="214,856.8 226.2,890.8 214,882.3 201.8,890.8" fill="#fff" stroke="#000" stroke-width="4" stroke-linejoin="round" />
+    <text id="north">N</text>
+  </svg>
+  <script src="/__shared/vector-map.js"></script>
+  <script src="map-style.js"></script>
+  <script src="radar.js"></script>
+</body>
+</html>

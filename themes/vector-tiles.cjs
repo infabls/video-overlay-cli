@@ -53,8 +53,10 @@ function decode(buffer) {
   each('water', POLYGON, (g) => out.water.push(g));
   each('waterway', POINT_LINE, (g) => out.waterway.push(...g));
   each('building', POLYGON, (g) => out.building.push(g));
-  each('park', POLYGON, (g) => out.park.push(g));
+  // green areas: only real vegetation; the "park" layer holds nature reserve outlines, which cover
+  // whole districts
   each('landcover', POLYGON, (g, p) => { if (p.class === 'wood' || p.class === 'grass') out.park.push(g); });
+  each('landuse', POLYGON, (g, p) => { if (['pitch', 'playground', 'stadium'].includes(p.class)) out.park.push(g); });
   each('transportation', POINT_LINE, (g, p) => out.roads.push({ c: p.class, l: g }));
   return out;
 }

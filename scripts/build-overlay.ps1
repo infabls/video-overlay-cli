@@ -19,6 +19,8 @@ param(
   [string]$Theme = "gta-sa",
   [ValidateSet("kph", "mph")][string]$Units = "kph",
   [ValidateSet("raster", "vector")][string]$Map = "raster",
+  # video encoder: auto = NVIDIA GPU (NVENC) when it works, otherwise libx264 on the CPU
+  [ValidateSet("auto", "nvenc", "x264")][string]$Encoder = "auto",
   [string]$Layout = "",
   [string]$Cli = "",
   [double]$Offset = 0,
@@ -31,22 +33,24 @@ param(
   [string]$Work = ""
 )
 $ErrorActionPreference = "Stop"
-if ($Map -eq "vector" -and $Theme -ne "nfsu2") { throw "-Map vector is supported by the nfsu2 theme only" }
+if ($Map -eq "vector" -and $Theme -notin "nfsu2", "gta-sa") { throw "-Map vector is supported by the nfsu2 and gta-sa themes only" }
 $root = Split-Path -Parent $PSScriptRoot
 $themesDir = Join-Path $root "themes"
 if (-not $Cli) { $Cli = Join-Path $root "bin/video-overlay-cli.exe" }
 if (-not $Work) { $Work = Join-Path ([IO.Path]::GetTempPath()) "overlay-build-$Theme" }
 
 # gta-sa keeps its React app in hud-react/ and a Go radar; other themes are plain folders in themes/.
+# With -Map vector the gta-sa radar is themes/gta-sa-radar instead of the Go layer.
 $useRadar = $false
+$radarTheme = ""
 if ($Theme -eq "gta-sa") {
   $themeDir = Join-Path $root "hud-react\build"
-  $useRadar = $true
-  if (-not $Layout) { $Layout = "layouts\gta-sa.xml" }
+  if ($Map -eq "vector") { $radarTheme = Join-Path $themesDir "gta-sa-radar" }
+  elseif (-not $Layout) { $Layout = "layouts\gta-sa.xml" }
 } else {
   $themeDir = Join-Path $themesDir $Theme
-  if ($Layout) { $useRadar = $true }
 }
+if ($Layout) { $useRadar = $true }
 if ($Layout -and -not [IO.Path]::IsPathRooted($Layout)) { $Layout = Join-Path $root $Layout }
 
 function Invoke-Step([string]$Name, [scriptblock]$Block) {
@@ -54,6 +58,24 @@ function Invoke-Step([string]$Name, [scriptblock]$Block) {
   & $Block
   if ($LASTEXITCODE -ne 0) { throw "$Name failed (exit $LASTEXITCODE)" }
 }
+
+if ($Encoder -eq "auto") {
+  # listed encoders may still fail without a suitable GPU or driver, so try a tiny encode
+  $previous = $ErrorActionPreference
+  $ErrorActionPreference = "Continue"
+  ffmpeg -v quiet -f lavfi -i "color=size=256x256:duration=0.1" -c:v h264_nvenc -f null - 2>$null
+  $Encoder = if ($LASTEXITCODE -eq 0) { "nvenc" } else { "x264" }
+  $ErrorActionPreference = $previous
+}
+# -cq 19 matches the quality of libx264 -crf 18 (measured by PSNR/SSIM on GoPro footage)
+if ($Encoder -eq "nvenc") {
+  $decodeArgs = @("-hwaccel", "cuda")
+  $encodeArgs = @("-c:v", "h264_nvenc", "-profile:v", "high", "-preset", "p5", "-rc", "vbr", "-cq", "19", "-b:v", "0")
+} else {
+  $decodeArgs = @()
+  $encodeArgs = @("-c:v", "libx264", "-crf", "18", "-preset", "medium")
+}
+Write-Host "encoder: $Encoder"
 
 $duration = [double]::Parse((ffprobe -v error -show_entries format=duration -of csv=p=0 $Video), [Globalization.CultureInfo]::InvariantCulture)
 if ($Limit -gt 0 -and $Limit -lt $duration) { $duration = $Limit }
@@ -88,18 +110,38 @@ Invoke-Step "theme frames ($Theme)" {
     --width $Width --height $Height --tz $TzHours --stars $Stars --units $Units --map $Map
 }
 $clip = Get-Content (Join-Path $frames "clip.json") -Raw | ConvertFrom-Json
+if ($radarTheme) {
+  $radarFrames = Join-Path $Work "radar-frames"
+  if (Test-Path $radarFrames) { Remove-Item -Recurse -Force $radarFrames }
+  Invoke-Step "radar frames (vector)" {
+    node (Join-Path $themesDir "capture.cjs") --theme $radarTheme --gpx $Gpx --out $radarFrames --duration $duration --fps $Fps `
+      --width $Width --height $Height
+  }
+  $radarClip = Get-Content (Join-Path $radarFrames "clip.json") -Raw | ConvertFrom-Json
+}
 
 Invoke-Step "composite (ffmpeg)" {
-  $themeInput = @("-itsoffset", $Offset, "-framerate", $Fps, "-i", (Join-Path $frames "hud_%04d.png"))
-  $place = "overlay=$($clip.x):$($clip.y):format=auto,format=yuv420p[v]"
+  # layers over the video, bottom to top: radar (Go .mov and/or vector frames), then the theme
+  $inputs = @()
+  $positions = @()
   if ($useRadar) {
-    $filter = "[0:v][1:v]overlay=0:0[a];[a][2:v]$place"
-    ffmpeg -v error -y -i $Video -itsoffset $Offset -i $radar @themeInput `
-      -filter_complex $filter -map "[v]" -map "0:a?" -t $duration -c:v libx264 -crf 18 -preset medium -c:a copy $Output
-  } else {
-    $filter = "[0:v][1:v]$place"
-    ffmpeg -v error -y -i $Video @themeInput `
-      -filter_complex $filter -map "[v]" -map "0:a?" -t $duration -c:v libx264 -crf 18 -preset medium -c:a copy $Output
+    $inputs += @("-itsoffset", $Offset, "-i", $radar)
+    $positions += "0:0"
   }
+  if ($radarTheme) {
+    $inputs += @("-itsoffset", $Offset, "-framerate", $Fps, "-i", (Join-Path $radarFrames "hud_%04d.png"))
+    $positions += "$($radarClip.x):$($radarClip.y)"
+  }
+  $inputs += @("-itsoffset", $Offset, "-framerate", $Fps, "-i", (Join-Path $frames "hud_%04d.png"))
+  $positions += "$($clip.x):$($clip.y)"
+  $chain = @()
+  $last = "0:v"
+  for ($i = 0; $i -lt $positions.Count - 1; $i++) {
+    $chain += "[$last][$($i + 1):v]overlay=$($positions[$i])[l$i]"
+    $last = "l$i"
+  }
+  $chain += "[$last][$($positions.Count):v]overlay=$($positions[-1]):format=auto,format=yuv420p[v]"
+  ffmpeg -v error -y @decodeArgs -i $Video @inputs `
+    -filter_complex ($chain -join ";") -map "[v]" -map "0:a?" -t $duration @encodeArgs -c:a copy $Output
 }
 Write-Host "Wrote $Output"

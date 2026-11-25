@@ -11,7 +11,7 @@ A theme is a static web page that draws a game-style HUD. `themes/capture.cjs` o
 .\scripts\build-overlay.ps1 -Theme nfsu2 -Video E:\DCIM\100GOPRO\GX015729.MP4 -Gpx .\tracks\track.gpx -Output .\renders\nfsu2.mp4
 ```
 
-Parameters: `-Theme`, `-Map raster|vector` (nfsu2 only, see below), `-Units kph|mph`, `-Offset`, `-TzHours`, `-Limit` (first N seconds, for checks), `-Stars` (GTA themes), `-Layout` (also render a Go radar layer from this XML, any theme), `-Fps`, `-Width`, `-Height`. Needs `ffmpeg`/`ffprobe`, Node, `pnpm` and Chrome; the first run installs `themes/` dependencies.
+Parameters: `-Theme`, `-Map raster|vector` (see below), `-Encoder auto|nvenc|x264` (default `auto`: NVIDIA GPU encoding and decoding when it works, otherwise libx264 on the CPU; both give about the same quality), `-Units kph|mph`, `-Offset`, `-TzHours`, `-Limit` (first N seconds, for checks), `-Stars` (GTA themes), `-Layout` (also render a Go radar layer from this XML, any theme), `-Fps`, `-Width`, `-Height`. Needs `ffmpeg`/`ffprobe`, Node, `pnpm` and Chrome; the first run installs `themes/` dependencies.
 
 ## Making a theme
 
@@ -33,9 +33,9 @@ The sample:
 
 Map tiles: request `/__tile/{z}/{x}/{y}.png` from the page; the capture server proxies it to OpenStreetMap (`--tile-url` to change), identifies itself with a User-Agent, and caches tiles on disk. Respect the tile provider's usage policy.
 
-## Vector minimap (trial)
+## Vector minimap
 
-`-Map vector` (capture: `--map vector`) draws the `nfsu2` radar from vector tiles instead of recoloring raster tiles: no label leftovers, road width set per road class, divided roads shown as two carriageways. The default stays `raster`.
+`-Map vector` draws the radar from vector tiles instead of recoloring raster tiles: no label leftovers, road width set per road class, divided roads kept as separate carriageways. Supported by `nfsu2` (capture: `--map vector`) and `gta-sa` (the Go radar is replaced by the `themes/gta-sa-radar` layer; same geometry as `layouts/gta-sa.xml`, style in its `map-style.js`). The default stays `raster`.
 
 ```powershell
 .\scripts\build-overlay.ps1 -Theme nfsu2 -Map vector -Video E:\DCIM\100GOPRO\GX015729.MP4 -Gpx .\tracks\track.gpx -Output .\renders\nfsu2-vector.mp4
