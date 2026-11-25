@@ -4,11 +4,11 @@ A theme is a static web page that draws a game-style HUD. `themes/capture.cjs` o
 
 | Theme | Where | Notes |
 | --- | --- | --- |
-| `nfsu2` | `themes/nfsu2/` | Need for Speed: Underground 2 - tachometer with N2O ring, speed and gear, small acceleration gauge, circular minimap (OSM tiles recolored), Bank-style distance box, Trax-style clock box, top-speed call-out. Full-frame, draws its own minimap. |
+| `nfsu2` | `themes/nfsu2/` | Need for Speed: Underground 2 - tachometer with N2O ring, speed (km/h by default, `-Units mph` optional) and gear, small acceleration gauge, circular minimap (OSM tiles reduced to roads and water, labels removed), Bank-style distance box, Trax-style clock box, top-speed call-out. Full-frame, draws its own minimap. Colors are sampled from game screenshots. |
 | `gta-sa` | `hud-react/` + `layouts/gta-sa.xml` | See [gta-sa.md](gta-sa.md). Corner HUD from a React app, radar from the Go renderer. |
 
 ```powershell
-.\scripts\build-overlay.ps1 -Theme nfsu2 -Units mph -Video E:\DCIM\100GOPRO\GX015729.MP4 -Gpx .\tracks\track.gpx -Output .\renders\nfsu2.mp4
+.\scripts\build-overlay.ps1 -Theme nfsu2 -Video E:\DCIM\100GOPRO\GX015729.MP4 -Gpx .\tracks\track.gpx -Output .\renders\nfsu2.mp4
 ```
 
 Parameters: `-Theme`, `-Units kph|mph`, `-Offset`, `-TzHours`, `-Limit` (first N seconds, for checks), `-Stars` (GTA themes), `-Layout` (also render a Go radar layer from this XML, any theme), `-Fps`, `-Width`, `-Height`. Needs `ffmpeg`/`ffprobe`, Node, `pnpm` and Chrome; the first run installs `themes/` dependencies.

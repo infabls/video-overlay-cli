@@ -7,30 +7,28 @@
   <link rel="stylesheet" href="theme.css">
 </head>
 <body>
-  <!-- top-left: "Trax" box (clock and elapsed time) -->
+  <!-- top-left: "Trax" box (clock, elapsed time, average speed); the stepped frame is drawn by theme.js -->
   <section id="trax">
+    <svg id="trax-frame"></svg>
     <div class="caption">RIDE LOG</div>
-    <div class="title" id="trax-clock">--:--</div>
-    <div class="sub">Elapsed <span id="trax-elapsed">00:00</span></div>
+    <div class="line" id="trax-clock">--:--</div>
+    <div class="line">Elapsed <span id="trax-elapsed">00:00</span></div>
+    <div class="line">Avg <span id="trax-avg">0</span> <span id="trax-avg-unit">km/h</span></div>
   </section>
 
-  <!-- top-right: "Bank" box (distance) and the top-speed call-out -->
-  <section id="bank"><span class="label">Dist:</span><span class="value"><span id="bank-value">0.00</span><small>km</small></span></section>
+  <!-- top-right: "Bank" box (distance) and the "DRAFTING +66"-style top-speed call-out -->
+  <section id="bank"><span class="label">Dist:</span><span class="value"><span id="bank-value">0.00</span><small id="bank-unit">km</small></span></section>
   <section id="topspeed"><div class="label">TOP SPEED</div><div class="value" id="topspeed-value">+0</div></section>
 
-  <!-- bottom-left: radar -->
+  <!-- bottom-left: radar (map canvas under a matte ring with decorative markers) -->
   <section id="radar">
-    <canvas id="map" width="236" height="236"></canvas>
-    <div class="ring"></div>
-    <svg id="player" viewBox="-12 -14 24 28"><polygon points="0,-11 8,9 0,5 -8,9" /></svg>
+    <canvas id="map" width="270" height="270"></canvas>
+    <svg id="ring" viewBox="-160 -160 320 320"></svg>
+    <svg id="player" viewBox="-12 -14 24 28"><polygon points="0,-12 9,10 -9,10" /></svg>
   </section>
 
-  <!-- bottom-right: gauges -->
-  <section id="speedo">
-    <svg id="gauge" viewBox="-200 -200 400 400"></svg>
-    <svg id="aux" viewBox="-80 -80 160 160"></svg>
-    <div id="digital"><div id="gear">1</div><div id="speed">0</div><div id="unit">MPH</div></div>
-  </section>
+  <!-- bottom-right: tachometer with N2O ring, digital gear/speed, small acceleration gauge -->
+  <section id="speedo"><svg id="gauge" viewBox="-290 -200 520 360"></svg></section>
 
   <script src="theme.js"></script>
 </body>
