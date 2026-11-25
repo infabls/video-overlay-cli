@@ -6,7 +6,7 @@ The two halves are rendered separately and merged in a single ffmpeg encode:
 
 | Part | Made by | Source |
 | --- | --- | --- |
-| Radar with heading-up map, north marker, player arrow | Go renderer, layout `gta-sa.xml` (`moving_map style="gta-sa" marker="gta-sa"`, `compass labels="N"`) | GPX/FIT |
+| Radar with heading-up map, north marker, player arrow | Go renderer, layout `gta-sa.xml` (`moving_map style="gta-sa" marker="gta-sa"`, `compass labels="N" label_radius="0.97"` with `outline`/`outline_width`: the N rides the radar ring) | GPX/FIT |
 | Status cluster | React app in `hud-react/` (fork of [MickMelon/gta-sa-hud-react](https://github.com/MickMelon/gta-sa-hud-react), MIT), captured frame by frame in headless Chrome by `hud-react/capture.cjs` | GPX |
 
 ## One command (Windows)
@@ -17,7 +17,7 @@ The two halves are rendered separately and merged in a single ffmpeg encode:
 
 Requirements: `ffmpeg`/`ffprobe`, Node, `pnpm`, Chrome, and a built `video-overlay-cli.exe` in the repository root (`-Cli` overrides). The first run installs and builds `hud-react`.
 
-Useful parameters: `-Offset` (seconds into the video where the track starts), `-TzHours` (clock = GPX time + offset), `-Limit` (render only the first N seconds of video, for quick checks), `-Layout`.
+Useful parameters: `-Offset` (seconds into the video where the track starts), `-TzHours` (clock = GPX time + offset), `-Limit` (render only the first N seconds of video, for quick checks), `-Layout`, `-Stars` (lit wanted-level stars, 0-6, default 6).
 
 The speed and distance on the HUD are computed from consecutive GPX points, so a track with invented timestamps shows invented speeds. Use a recorded track for real values.
 

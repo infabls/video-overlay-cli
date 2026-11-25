@@ -2,7 +2,18 @@ import { useEffect, useState } from "react";
 import Bar from "./Bar";
 import Time from "./Time";
 
-type HudSample = { hour: number; minute: number; speedKph: number; distanceKm: number };
+type HudSample = { hour: number; minute: number; speedKph: number; distanceKm: number; wanted?: number };
+
+const STAR = "20,2 25.5,14.5 39,15.5 28.8,24.5 31.9,38 20,31 8.1,38 11.2,24.5 1,15.5 14.5,14.5";
+const Stars = ({ active }: { active: number }) => (
+  <div className="mt-1 flex flex-row gap-[2px]">
+    {Array.from({ length: 6 }, (_, i) => (
+      <svg key={i} width="40" height="40" viewBox="0 0 40 40">
+        <polygon points={STAR} fill={i < active ? "#e8c52c" : "#3a3a3a"} stroke="#000" strokeWidth="3" strokeLinejoin="miter" />
+      </svg>
+    ))}
+  </div>
+);
 declare global { interface Window { setHudSample?: (sample: HudSample) => void } }
 
 const Hud = () => {
@@ -12,7 +23,7 @@ const Hud = () => {
     <div className="hud-anchor select-none">
       <div className="flex flex-row items-start">
         <div className="mr-2 w-[100px] h-[100px] flex items-center justify-center">
-          <img src="/bicycle.png" alt="Bicycle" className="w-[88px] h-[88px] object-contain brightness-0 invert" />
+          <img src="/fist.png" alt="Fist" className="w-[100px] h-[100px] object-contain" />
         </div>
         <div className="w-[240px]">
           <Time hour={sample.hour} minute={sample.minute} />
@@ -30,6 +41,7 @@ const Hud = () => {
           {sample.distanceKm.toFixed(2)}<span className="ml-2 text-xl">KM</span>
         </div>
       </div>
+      <div className="flex justify-end"><Stars active={sample.wanted ?? 6} /></div>
     </div>
   );
 };

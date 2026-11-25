@@ -7,3 +7,6 @@
 # HUD React app
 /hud-react/node_modules/
 /hud-react/build/
+
+# GTA SA game fonts: downloaded locally, not redistributed
+/assets/fonts/gta-sa/

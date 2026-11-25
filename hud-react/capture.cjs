@@ -10,7 +10,7 @@ const path = require('path');
 const puppeteer = require('puppeteer-core');
 
 const HUD_W = 540;
-const HUD_H = 240;
+const HUD_H = 290;
 
 function parseArgs(argv) {
   const args = {};
@@ -28,6 +28,7 @@ const duration = Number(args.duration);
 const width = Number(args.width || 1920);
 const height = Number(args.height || 1080);
 const tzHours = Number(args.tz || 0); // clock shown on the HUD = GPX time + this offset
+const wanted = Number(args.stars ?? 6); // lit wanted-level stars, 0..6
 const offset = Number(args.offset || 0); // seconds into the GPX track where the video starts
 const chrome = args.chrome || process.env.CHROME_PATH || [
   'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
@@ -73,6 +74,7 @@ function sampleAt(seconds) {
     minute: local.getUTCMinutes(),
     speedKph: a.speed + (b.speed - a.speed) * f,
     distanceKm: (a.cum + segment[i] * f) / 1000,
+    wanted,
   };
 }
 

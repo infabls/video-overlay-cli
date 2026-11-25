@@ -32,6 +32,18 @@ func compassFactory(element *layout.Element, _ *render.Context) (render.Drawer, 
 	if err != nil {
 		return nil, err
 	}
+	labelRadius, err := floatAttr(element, "label_radius", 0.5)
+	if err != nil || labelRadius <= 0 || labelRadius > 1.5 {
+		return nil, fmt.Errorf("compass label_radius must be between 0 and 1.5")
+	}
+	textOutline, err := colorAttr(element, "outline", color.RGBA{})
+	if err != nil {
+		return nil, err
+	}
+	textOutlineWidth, err := floatAttr(element, "outline_width", 0)
+	if err != nil || textOutlineWidth < 0 {
+		return nil, fmt.Errorf("compass outline_width must not be negative")
+	}
 	labels := strings.ToUpper(attr(element, "labels", "NESW"))
 	for _, label := range labels {
 		if !strings.ContainsRune("NESW", label) {
@@ -121,8 +133,8 @@ func compassFactory(element *layout.Element, _ *render.Context) (render.Drawer, 
 			if !strings.Contains(labels, label) {
 				continue
 			}
-			x, y := roundPoint(cx, cy, radius/2, float64(angle)-heading)
-			drawText(ctx, x, y+textSize/3, textSize, label, "center", text, color.RGBA{}, 0)
+			x, y := roundPoint(cx, cy, radius*labelRadius, float64(angle)-heading)
+			drawText(ctx, x, y+textSize/3, textSize, label, "center", text, textOutline, textOutlineWidth)
 		}
 		ctx.Canvas.Push()
 		ctx.Canvas.SetFillColor(nrgba(fg))

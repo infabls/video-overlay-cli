@@ -17,6 +17,7 @@ param(
   [string]$Cli = "",
   [double]$Offset = 0,
   [double]$TzHours = 0,
+  [int]$Stars = 6,
   [int]$Fps = 10,
   [int]$Width = 1920,
   [int]$Height = 1080,
@@ -57,7 +58,7 @@ Invoke-Step "radar (Go)" {
     --background transparent --profile alpha-prores
 }
 Invoke-Step "HUD frames (React)" {
-  node (Join-Path $hudDir "capture.cjs") --gpx $Gpx --out $frames --duration $duration --fps $Fps --width $Width --height $Height --tz $TzHours
+  node (Join-Path $hudDir "capture.cjs") --gpx $Gpx --out $frames --duration $duration --fps $Fps --width $Width --height $Height --tz $TzHours --stars $Stars
 }
 Invoke-Step "composite (ffmpeg)" {
   $hudX = $Width - 540
