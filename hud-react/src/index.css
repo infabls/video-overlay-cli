@@ -106,5 +106,15 @@
 }
 
 html, body, #root { width: 100%; height: 100%; margin: 0; overflow: hidden; background: transparent !important; }
-.hud-anchor { position: absolute; top: 38px; right: 58px; }
+.hud-anchor { position: absolute; top: 26px; right: 58px; }
+
+/* Pricedown with a black outline behind the fill: stroke first, then fill (paint-order). */
+.gta-text {
+  font-family: "Pricedown", sans-serif;
+  stroke: #000;
+  stroke-linejoin: round;
+  paint-order: stroke fill;
+  filter: drop-shadow(1px 2px 0 rgba(0, 0, 0, 0.35));
+}
+.fist { display: block; filter: drop-shadow(1px 2px 0 rgba(0, 0, 0, 0.3)); }
 

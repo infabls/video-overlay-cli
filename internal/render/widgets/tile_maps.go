@@ -113,7 +113,7 @@ func movingMapFactory(element *layout.Element, _ *render.Context) (render.Drawer
 				arrowHeading = heading
 			}
 			local, raster := localCanvas(ctx, frame)
-			drawGTASAArrow(&local, float64(size)/2, float64(size)/2, float64(size)/22, arrowHeading)
+			drawGTASAArrow(&local, float64(size)/2, float64(size)/2, float64(size)/26, arrowHeading)
 			raster.Close()
 		}
 		if showAttribution {
@@ -127,42 +127,6 @@ func movingMapFactory(element *layout.Element, _ *render.Context) (render.Drawer
 		drawMapImage(ctx, frame)
 		return nil
 	}, nil
-}
-
-func applyGTASAMapStyle(img *image.RGBA) {
-	for y := img.Rect.Min.Y; y < img.Rect.Max.Y; y++ {
-		for x := img.Rect.Min.X; x < img.Rect.Max.X; x++ {
-			index := img.PixOffset(x, y)
-			if img.Pix[index+3] == 0 {
-				continue
-			}
-			r, g, b := int(img.Pix[index]), int(img.Pix[index+1]), int(img.Pix[index+2])
-			chroma := max(r, g, b) - min(r, g, b)
-			luma := (299*r + 587*g + 114*b) / 1000
-			var out [3]uint8
-			switch {
-			case b > g+8 && g > r+14:
-				out = [3]uint8{107, 150, 160} // water
-			case g > r+8 && g > b+8 && g > 95:
-				out = [3]uint8{95, 126, 72} // parks
-			case r > g+8 && g > b+25 && luma > 190:
-				out = [3]uint8{236, 232, 214} // yellow major roads
-			case r > g+18:
-				out = [3]uint8{176, 169, 142} // dotted footpaths: drop into the ground
-			case luma < 150:
-				out = [3]uint8{176, 169, 142} // labels and strong outlines: drop into the ground
-			case luma >= 250 && chroma < 8:
-				out = [3]uint8{236, 232, 214} // road surface
-			case luma >= 228:
-				out = [3]uint8{176, 169, 142} // open ground
-			case chroma >= 12:
-				out = [3]uint8{146, 139, 114} // buildings
-			default:
-				out = [3]uint8{128, 122, 100} // road edges
-			}
-			img.Pix[index], img.Pix[index+1], img.Pix[index+2] = out[0], out[1], out[2]
-		}
-	}
 }
 
 func journeyMapFactory(element *layout.Element, setup *render.Context) (render.Drawer, error) {

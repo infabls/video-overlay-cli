@@ -1,7 +1,7 @@
 <layout>
     <frame x="43" y="704" width="342" height="342" cr="171" bg="5,5,5,255" opacity="1">
-        <component type="moving_map" x="7" y="7" size="328" zoom="16" corner_radius="164" opacity="1" rotate="true" show-attribution="false" style="gta-sa" marker="gta-sa" />
+        <component type="moving_map" x="13" y="13" size="316" zoom="16" corner_radius="158" opacity="1" rotate="true" show-attribution="false" style="gta-sa" marker="gta-sa" />
     </frame>
     <!-- North letter sits on the radar ring and travels around it as the map rotates (as in the game). -->
-    <component type="compass" x="43" y="704" size="342" textsize="34" fg="0,0,0,0" bg="0,0,0,0" text="242,242,242,255" outline="0,0,0,255" outline_width="5" labels="N" label_radius="0.97" />
+    <component type="compass" x="43" y="704" size="342" textsize="40" fg="0,0,0,0" bg="0,0,0,0" text="242,242,242,255" outline="0,0,0,255" outline_width="5" labels="N" label_radius="0.97" />
 </layout>
