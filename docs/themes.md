@@ -11,7 +11,7 @@ A theme is a static web page that draws a game-style HUD. `themes/capture.cjs` o
 .\scripts\build-overlay.ps1 -Theme nfsu2 -Video E:\DCIM\100GOPRO\GX015729.MP4 -Gpx .\tracks\track.gpx -Output .\renders\nfsu2.mp4
 ```
 
-Parameters: `-Theme`, `-Units kph|mph`, `-Offset`, `-TzHours`, `-Limit` (first N seconds, for checks), `-Stars` (GTA themes), `-Layout` (also render a Go radar layer from this XML, any theme), `-Fps`, `-Width`, `-Height`. Needs `ffmpeg`/`ffprobe`, Node, `pnpm` and Chrome; the first run installs `themes/` dependencies.
+Parameters: `-Theme`, `-Map raster|vector` (nfsu2 only, see below), `-Units kph|mph`, `-Offset`, `-TzHours`, `-Limit` (first N seconds, for checks), `-Stars` (GTA themes), `-Layout` (also render a Go radar layer from this XML, any theme), `-Fps`, `-Width`, `-Height`. Needs `ffmpeg`/`ffprobe`, Node, `pnpm` and Chrome; the first run installs `themes/` dependencies.
 
 ## Making a theme
 
@@ -32,6 +32,19 @@ The sample:
 | `unit`, `wanted` | `kph`/`mph` and GTA star count |
 
 Map tiles: request `/__tile/{z}/{x}/{y}.png` from the page; the capture server proxies it to OpenStreetMap (`--tile-url` to change), identifies itself with a User-Agent, and caches tiles on disk. Respect the tile provider's usage policy.
+
+## Vector minimap (trial)
+
+`-Map vector` (capture: `--map vector`) draws the `nfsu2` radar from vector tiles instead of recoloring raster tiles: no label leftovers, road width set per road class, divided roads shown as two carriageways. The default stays `raster`.
+
+```powershell
+.\scripts\build-overlay.ps1 -Theme nfsu2 -Map vector -Video E:\DCIM\100GOPRO\GX015729.MP4 -Gpx .\tracks\track.gpx -Output .\renders\nfsu2-vector.mp4
+```
+
+- The look is one style object: `themes/nfsu2/map-style.js` (colors, opacity, width per road class, zoom).
+- `themes/shared/vector-map.js` is the theme-independent renderer (`window.createVectorMap(canvas, style)`); the capture server serves it as `/__shared/vector-map.js`.
+- Tiles come from `/__vtile/{z}/{x}/{y}.json`: `themes/vector-tiles.cjs` downloads OpenMapTiles-schema `.pbf` tiles (default [OpenFreeMap](https://openfreemap.org), no API key; `--vtile-url` takes another TileJSON), caches them and returns only the geometry. Data is available up to zoom 14 and scaled up from there.
+- Attribution for published videos: OpenFreeMap © OpenMapTiles, data © OpenStreetMap contributors.
 
 Try a theme without a video: `node themes/capture.cjs --theme themes/nfsu2 --gpx tracks/track.gpx --out out --duration 3 --fps 10`.
 

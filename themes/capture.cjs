@@ -10,7 +10,9 @@
 // {x, y, width, height} - where to overlay the frames on the video.
 //
 // Sample: { hour, minute, elapsed, speedKph, accelKph, distanceKm, lat, lon, heading, wanted, unit }
-// A theme can request map tiles from /__tile/{z}/{x}/{y}.png (proxied to --tile-url and cached on disk).
+// A theme can request map tiles from /__tile/{z}/{x}/{y}.png (proxied to --tile-url and cached on disk),
+// or decoded vector tiles from /__vtile/{z}/{x}/{y}.json (see vector-tiles.cjs, --vtile-url = TileJSON).
+// --map raster|vector is passed to the theme as ?map=vector.
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
@@ -39,6 +41,8 @@ const unit = args.units === 'mph' ? 'mph' : 'kph';
 const offset = Number(args.offset || 0); // seconds into the GPX track where the overlay starts
 const tileUrl = args['tile-url'] || 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const tileCache = args['tile-cache'] || path.join(os.tmpdir(), 'overlay-theme-tiles');
+const mapMode = args.map || 'raster';
+if (!['raster', 'vector'].includes(mapMode)) throw new Error('--map must be raster or vector');
 const chrome = args.chrome || process.env.CHROME_PATH || [
   'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
   'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
@@ -148,8 +152,27 @@ function fetchTile(url, file, res) {
   }).on('error', () => res.writeHead(502).end());
 }
 
+let vectorTiles = null; // loaded on first use: raster themes do not need the decoder packages
+function serveVectorTile(z, x, y, res) {
+  vectorTiles ??= require('./vector-tiles.cjs').createVectorTiles({
+    cacheDir: path.join(tileCache, 'vector'),
+    tileJson: args['vtile-url'],
+  });
+  vectorTiles(z, x, y).then(
+    (data) => res.writeHead(200, { 'Content-Type': 'application/json' }).end(JSON.stringify(data)),
+    (error) => { console.error('vector tile:', error.message); res.writeHead(502).end(); },
+  );
+}
+
 const server = http.createServer((req, res) => {
   const rel = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+  const vtile = rel.match(/^\/__vtile\/(\d+)\/(\d+)\/(\d+)\.json$/);
+  if (vtile) { serveVectorTile(Number(vtile[1]), Number(vtile[2]), Number(vtile[3]), res); return; }
+  if (rel === '/__shared/vector-map.js') {
+    res.writeHead(200, { 'Content-Type': 'text/javascript' });
+    fs.createReadStream(path.join(__dirname, 'shared', 'vector-map.js')).pipe(res);
+    return;
+  }
   const tile = rel.match(/^\/__tile\/(\d+)\/(\d+)\/(\d+)\.png$/);
   if (tile) {
     const [, z, x, y] = tile;
@@ -166,7 +189,7 @@ const server = http.createServer((req, res) => {
 
 (async () => {
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
-  const url = `http://127.0.0.1:${server.address().port}/`;
+  const url = `http://127.0.0.1:${server.address().port}/${mapMode === 'vector' ? '?map=vector' : ''}`;
   fs.mkdirSync(args.out, { recursive: true });
   fs.writeFileSync(path.join(args.out, 'clip.json'), JSON.stringify(clip));
   const browser = await puppeteer.launch({ executablePath: chrome, headless: true, args: ['--hide-scrollbars'] });

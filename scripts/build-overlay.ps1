@@ -18,6 +18,7 @@ param(
   [Parameter(Mandatory)][string]$Output,
   [string]$Theme = "gta-sa",
   [ValidateSet("kph", "mph")][string]$Units = "kph",
+  [ValidateSet("raster", "vector")][string]$Map = "raster",
   [string]$Layout = "",
   [string]$Cli = "",
   [double]$Offset = 0,
@@ -30,6 +31,7 @@ param(
   [string]$Work = ""
 )
 $ErrorActionPreference = "Stop"
+if ($Map -eq "vector" -and $Theme -ne "nfsu2") { throw "-Map vector is supported by the nfsu2 theme only" }
 $root = Split-Path -Parent $PSScriptRoot
 $themesDir = Join-Path $root "themes"
 if (-not $Cli) { $Cli = Join-Path $root "bin/video-overlay-cli.exe" }
@@ -60,7 +62,8 @@ $frames = Join-Path $Work "frames"
 $radar = Join-Path $Work "radar.mov"
 if (Test-Path $frames) { Remove-Item -Recurse -Force $frames }
 
-if (-not (Test-Path (Join-Path $themesDir "node_modules"))) {
+if (-not (Test-Path (Join-Path $themesDir "node_modules")) -or
+    ($Map -eq "vector" -and -not (Test-Path (Join-Path $themesDir "node_modules\@mapbox\vector-tile")))) {
   Push-Location $themesDir
   try { Invoke-Step "themes install" { pnpm install --ignore-workspace } } finally { Pop-Location }
 }
@@ -82,7 +85,7 @@ if ($useRadar) {
 }
 Invoke-Step "theme frames ($Theme)" {
   node (Join-Path $themesDir "capture.cjs") --theme $themeDir --gpx $Gpx --out $frames --duration $duration --fps $Fps `
-    --width $Width --height $Height --tz $TzHours --stars $Stars --units $Units
+    --width $Width --height $Height --tz $TzHours --stars $Stars --units $Units --map $Map
 }
 $clip = Get-Content (Join-Path $frames "clip.json") -Raw | ConvertFrom-Json
 

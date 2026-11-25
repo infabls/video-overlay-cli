@@ -403,8 +403,14 @@
     }
   }
 
+  // ?map=vector draws the radar from vector tiles instead (see map-style.js)
+  const vectorMap = new URLSearchParams(window.location.search).get('map') === 'vector'
+    ? window.createVectorMap(map, window.mapStyle)
+    : null;
+
   let lastKey = '';
   async function drawMap(lat, lon, heading) {
+    if (vectorMap) return vectorMap(lat, lon, heading);
     const [px, py] = project(lat, lon);
     const key = `${Math.round(px)},${Math.round(py)}`;
     if (key !== lastKey) {
