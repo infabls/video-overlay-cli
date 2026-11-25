@@ -6,16 +6,16 @@ The two halves are rendered separately and merged in a single ffmpeg encode:
 
 | Part | Made by | Source |
 | --- | --- | --- |
-| Radar with heading-up map, north marker, player arrow | Go renderer, layout `gta-sa.xml` (`moving_map style="gta-sa" marker="gta-sa"`, `compass labels="N" label_radius="0.97"` with `outline`/`outline_width`: the N rides the radar ring) | GPX/FIT |
+| Radar with heading-up map, north marker, player arrow | Go renderer, layout `layouts/gta-sa.xml` (`moving_map style="gta-sa" marker="gta-sa"`, `compass labels="N" label_radius="0.97"` with `outline`/`outline_width`: the N rides the radar ring) | GPX/FIT |
 | Status cluster | React app in `hud-react/` (fork of [MickMelon/gta-sa-hud-react](https://github.com/MickMelon/gta-sa-hud-react), MIT), captured frame by frame in headless Chrome by `hud-react/capture.cjs` | GPX |
 
 ## One command (Windows)
 
 ```powershell
-.\scripts\build-gta-sa.ps1 -Video E:\DCIM\100GOPRO\GX015729.MP4 -Gpx ".\track.gpx" -Output .\gta-result.mp4
+.\scripts\build-gta-sa.ps1 -Video E:\DCIM\100GOPRO\GX015729.MP4 -Gpx .\tracks\track.gpx -Output .\renders\gta-sa.mp4
 ```
 
-Requirements: `ffmpeg`/`ffprobe`, Node, `pnpm`, Chrome, and a built `video-overlay-cli.exe` in the repository root (`-Cli` overrides). The first run installs and builds `hud-react`.
+Requirements: `ffmpeg`/`ffprobe`, Node, `pnpm`, Chrome, and a built `bin/video-overlay-cli.exe` (`go build -o bin/video-overlay-cli.exe ./cmd/video-overlay-cli`; `-Cli` overrides). The first run installs and builds `hud-react`.
 
 Useful parameters: `-Offset` (seconds into the video where the track starts), `-TzHours` (clock = GPX time + offset), `-Limit` (render only the first N seconds of video, for quick checks), `-Layout`, `-Stars` (lit wanted-level stars, 0-6, default 6).
 
@@ -26,7 +26,7 @@ The speed and distance on the HUD are computed from consecutive GPX points, so a
 `--snapshot SEC` renders a single PNG frame instead of a video:
 
 ```powershell
-.\video-overlay-cli.exe render --activity track.gpx --layout gta-sa.xml --output snap.png --background transparent --snapshot 30
+.\bin\video-overlay-cli.exe render --activity tracks\track.gpx --layout layouts\gta-sa.xml --output snap.png --background transparent --snapshot 30
 ```
 
 ## Changing the HUD
@@ -36,3 +36,7 @@ Edit `hud-react/src/components/Hud.tsx` (layout, icon in `hud-react/public/`, fo
 ## Updates from the original author
 
 This repository is a fork of `Bupyc/video-overlay-cli`: remote `upstream` is the author, `origin` is the fork. `main` mirrors upstream; the GTA work lives on branch `gta-sa`, and all changes are additive (new attributes, new flag), so existing layouts behave as before. To pull the author's updates and rebase: `.\scripts\sync-upstream.ps1`.
+
+## Folder layout
+
+`layouts/` XML layouts - `scripts/` pipeline - `hud-react/` HUD app - `bin/` built executables, `renders/` finished videos, `tracks/` GPX/FIT, `assets/fonts/gta-sa/` game fonts, `assets/reference/` screenshots (all five are git-ignored).

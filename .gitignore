@@ -10,3 +10,9 @@
 
 # GTA SA game fonts: downloaded locally, not redistributed
 /assets/fonts/gta-sa/
+
+# Local working folders
+/bin/
+/renders/
+/tracks/
+/assets/reference/

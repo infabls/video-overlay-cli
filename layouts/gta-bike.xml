@@ -1,0 +1,15 @@
+<layout>
+    <component type="moving_map"
+        x="55" y="690" size="300"
+        zoom="16" corner_radius="150" />
+
+    <composite x="390" y="830">
+        <component type="text"
+            x="0" y="0" size="22"
+            rgb="255,255,255,220">SPEED</component>
+        <component type="metric"
+            x="0" y="32" metric="speed"
+            units="kph" format=".0f"
+            size="58" rgb="255,255,255,255" />
+    </composite>
+</layout>

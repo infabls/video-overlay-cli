@@ -3,7 +3,7 @@
   GTA San Andreas overlay for a video: Go radar + React HUD, composited with ffmpeg in one encode.
 
 .EXAMPLE
-  .\scripts\build-gta-sa.ps1 -Video E:\DCIM\100GOPRO\GX015729.MP4 -Gpx ".\New file-timed.gpx" -Output .\gta-result.mp4
+  .\scripts\build-gta-sa.ps1 -Video E:\DCIM\100GOPRO\GX015729.MP4 -Gpx .\tracks\track.gpx -Output .\renders\gta-sa.mp4
 
 .NOTES
   Needs: ffmpeg/ffprobe in PATH, Node + pnpm, Chrome. First run installs and builds hud-react.
@@ -13,7 +13,7 @@ param(
   [Parameter(Mandatory)][string]$Video,
   [Parameter(Mandatory)][string]$Gpx,
   [Parameter(Mandatory)][string]$Output,
-  [string]$Layout = "gta-sa.xml",
+  [string]$Layout = "layouts\gta-sa.xml",
   [string]$Cli = "",
   [double]$Offset = 0,
   [double]$TzHours = 0,
@@ -27,7 +27,7 @@ param(
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $hudDir = Join-Path $root "hud-react"
-if (-not $Cli) { $Cli = Join-Path $root "video-overlay-cli.exe" }
+if (-not $Cli) { $Cli = Join-Path $root "bin/video-overlay-cli.exe" }
 if (-not $Work) { $Work = Join-Path ([IO.Path]::GetTempPath()) "gta-sa-build" }
 if (-not [IO.Path]::IsPathRooted($Layout)) { $Layout = Join-Path $root $Layout }
 
