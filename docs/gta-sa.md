@@ -32,3 +32,7 @@ The speed and distance on the HUD are computed from consecutive GPX points, so a
 ## Changing the HUD
 
 Edit `hud-react/src/components/Hud.tsx` (layout, icon in `hud-react/public/`, font in `hud-react/src/fonts/`), then `pnpm build` in `hud-react/`.
+
+## Updates from the original author
+
+This repository is a fork of `Bupyc/video-overlay-cli`: remote `upstream` is the author, `origin` is the fork. `main` mirrors upstream; the GTA work lives on branch `gta-sa`, and all changes are additive (new attributes, new flag), so existing layouts behave as before. To pull the author's updates and rebase: `.\scripts\sync-upstream.ps1`.
